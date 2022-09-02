@@ -13,10 +13,13 @@ def Estimated_speed(outputs, output, id, fps, width):
             work_IDs.append(m)
             work_prev_locations = outputs[m]  # 将当前帧有效检测车辆的信息存入work_locations中
     if len(work_IDs) > 0:
-        speed = (math.sqrt((work_locations[0] - work_prev_locations[0]) ** 2 +  # 计算有效检测车辆的速度，采用线性的从像素距离到真实空间距离的映射
-                           (work_locations[1] - work_prev_locations[1]) ** 2) *  # 当视频拍摄视角并不垂直于车辆移动轨迹时，测算出来的速度将比实际速度低
+        # speed = (math.sqrt((work_locations[0] - work_prev_locations[0]) ** 2 +  # 计算有效检测车辆的速度，采用线性的从像素距离到真实空间距离的映射
+        #                    (work_locations[1] - work_prev_locations[1]) ** 2) *  # 当视频拍摄视角并不垂直于车辆移动轨迹时，测算出来的速度将比实际速度低
+        #          width * fps / 5 * 3.6 * 2)
+        speed = (math.sqrt(
+            (work_locations[0] - work_prev_locations[0]) ** 2 + (work_locations[1] - work_prev_locations[1]) ** 2) /
                  width * fps / 5 * 3.6 * 2)
         # speed = 11.3
-        speed = str(round(speed, 1))
+        speed = str(round(speed, 1)) + "km/h"
         return speed
     return "unknown"

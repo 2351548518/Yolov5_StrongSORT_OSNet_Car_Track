@@ -64,31 +64,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.initLogo()
         self.initSlots()
 
-        self.device = '0'
+        self.device = ''
 
         self.yolo_weights = WEIGHTS / 'best.pt'
         self.strong_sort_weights = WEIGHTS / 'osnet_x0_25_market1501.pt'
 
         self.source = "images/17738409_da3-1-16_Trim.mp4"
         self.imgsz = (640, 640)
-        # self.conf_thres = 0.25
-        # self.max_det = 1000
-        # self.view_img=True
-        # self.save_txt = False
-        # self.save_conf = False
-        # self.save_crop = False
-        # self.nosave = False
-        # self.classes = None
-        # self.agnostic_nms = False
-        # self.augment = False
-        # self.visualize = False
-        # self.update = False
-        # self.project = ROOT / 'runs/detect'
-        # self.name = 'exp'
-        # self.exist_ok = False
-        # self.line_thickness = 3
-        # self.hide_labels = False
-        # self.hide_conf = False
         self.half = False
         self.dnn = False
 
@@ -118,31 +100,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.device = select_device(self.device)
         self.half &= self.device.type != 'cpu'  # half precision only supported on CUDA
 
-        # Load model
+        # Load model 只能使用pt模型
         self.model = DetectMultiBackend(self.yolo_weights, device=self.device, dnn=self.dnn, data=None, fp16=self.half)
         self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
-
-        # w = str(self.weights[0] if isinstance(self.weights, list) else self.weights)
-        # classify, suffix, suffixes = False, Path(w).suffix.lower(), ['.pt', '.onnx', '.tflite', '.pb', '']
-        # check_suffix(w, suffixes)  # check weights have acceptable suffix
-        #
-        #
-        # self.pt, self.onnx, self.tflite, self.pb, self.saved_model = (suffix == x for x in suffixes)  # backend booleans
-        # # 只能使用pt模型
-        # if self.pt:
-        #     self.model = torch.jit.load(w) if 'torchscript' in w else attempt_load(self.weights,
-        #                                                                            map_location=self.device)
-        #     self.stride = int(self.model.stride.max())  # model stride
-        #     self.names = self.model.module.names if hasattr(self.model,
-        #                                                     'module') else self.model.names  # get class names
-        #     if self.half:
-        #         self.model.half()  # to FP16
-        #     if classify:  # second-stage classifier
-        #         self.modelc = load_classifier(name='resnet50', n=2)  # initialize
-        #         self.modelc.load_state_dict(torch.load('resnet50.pt', map_location=self.device)['model']).to(
-        #             self.device).eval()
-        # else:
-        #     print("No weights")
 
     def initLogo(self):
         pix = QtGui.QPixmap('UI/YOLO.png')
@@ -156,10 +116,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.stopEvent.set()
             self.camButton.setEnabled(True)
             self.weightButton.setEnabled(True)
-            self.picButton.setText("Photo\Video")
+            self.picButton.setText("Video")
         else:
-            img_name, _ = QtWidgets.QFileDialog.getOpenFileName(
-                self, "选择图片或视频", "", "*.jpg;;*.png;;*.mp4")  # All Files(*)
+            img_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选择图片或视频", "", "*.mp4")  # All Files(*)
             if not img_name:
                 return
             if img_name.endswith("mp4"):
@@ -280,8 +239,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "目标检测Demo"))
-        self.picButton.setText(_translate("MainWindow", "Photo\Video"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "车辆跟踪Demo1"))
+        self.picButton.setText(_translate("MainWindow", "Video"))
         self.camButton.setText(_translate("MainWindow", "Camera"))
         self.weightButton.setText(_translate("MainWindow", "Weights"))
 
@@ -394,8 +353,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Run tracking
         self.model.warmup(imgsz=(1 if self.pt else nr_sources, 3, *imgsz))  # warmup
         # Run inference
-        # if pt and device.type != 'cpu':
-        #     model(torch.zeros(1, 3, *imgsz).to(device).type_as(next(model.parameters())))  # run once
         dt, seen = [0.0, 0.0, 0.0, 0.0], 0
 
         curr_frames, prev_frames = [None] * nr_sources, [None] * nr_sources
@@ -574,9 +531,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             strip_optimizer(yolo_weights)  # update model (to fix SourceChangeWarning)
 
 
-# if __name__ == "__main__":
-#     opt = parse_opt()
-#     main(opt)
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     ui = Ui_MainWindow()
