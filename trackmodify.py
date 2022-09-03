@@ -153,7 +153,12 @@ def run(
     # 开始检测过程
     for frame_idx, (path, im, im0s, vid_cap, s) in enumerate(dataset):
         t1 = time_sync()
+        # 图片预处理一下
+        # im = HistogramEqualization(im)
+        # im = deHazeDefogging(im)
+        im = homomorphic_filterDefogging(im)
         im = torch.from_numpy(im).to(device)
+
         im = im.half() if half else im.float()  # uint8 to fp16/32
         im /= 255.0  # 0 - 255 to 0.0 - 1.0
         if len(im.shape) == 3:
