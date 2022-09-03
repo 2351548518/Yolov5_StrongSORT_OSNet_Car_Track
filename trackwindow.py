@@ -428,7 +428,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     dt[3] += t5 - t4
 
                     # 这里进行测速代码
-                    # outputs_prev.append(outputs[i])
                     if len(outputs_prev) < 2:
                         outputs_prev.append(outputs[i])
                     else:
