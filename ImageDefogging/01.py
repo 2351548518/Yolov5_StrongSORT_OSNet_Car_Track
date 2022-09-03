@@ -1,7 +1,7 @@
 import cv2
 import matplotlib.pyplot as plt
 
-img = cv2.imread("50.jpg")
+img = cv2.imread("ImageDefogging/test.png")
 
 blue = img[:, :, 0]
 green = img[:, :, 1]

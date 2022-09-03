@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
-
-
-
+from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
 
 
 # 01.py
@@ -13,16 +13,16 @@ def HistogramEqualization(img):
     # red = img[:, :, 2]
     # img.shape = (3,384,640)
     # request = (640,384,3)
-    blue = img[0, :, :]
+    red = img[0, :, :]
     green = img[1, :, :]
-    red = img[2, :, :]
+    blue = img[2, :, :]
     blue_equ = cv2.equalizeHist(blue)
     green_equ = cv2.equalizeHist(green)
     red_equ = cv2.equalizeHist(red)
-    equ = cv2.merge([blue_equ, green_equ, red_equ])
-    equ = equ.transpose((2, 0, 1)) #WHC to CHW
+    out = cv2.merge([red_equ, green_equ, blue_equ])
+    out = out.transpose((2, 0, 1)) #WHC to CHW
 
-    return equ
+    return out
 
 
 # 02.py
@@ -85,52 +85,59 @@ def deHazeDefogging(img):
 
 
 # 03.py
-#############        自定义同态滤波器函数      ################r1-亮度
-def homomorphic_filter(src, d0=1, r1=2, rh=2, c=4, h=2.0, l=0.5):
-    # 图像灰度化处理
-    gray = src.copy()
-    if len(src.shape) > 2:  # 维度>2
-        gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+def HomorphicFiltering(original):
+    rows, cols = original.shape
+    # 对数化区分fi fx numpy的溢出若+1则 255的时候因为是uint 数据上溢 最后1 0000 0000 1被截断所以值为0 log 后为负无穷
+    # >> > np.log([1, np.e, np.e ** 2, 0])
+    # array([0., 1., 2., -Inf])
+    # pyhton 中的溢出，短整形会自动调整为长整型
+    # 1 对数化
+    original_log = np.log(1e-3 + original)
 
-    # 图像格式处理
-    gray = np.float64(gray)
+    # 2 高通滤波
+    original_log_F = np.fft.fftshift(np.fft.fft2(original_log))
+    # plt.figure()
+    # show(np.log(1e-3 + np.abs(original_log_F)), "cc", 1, 1, 1)
+    # plt.show()
 
-    # 设置数据维度n
-    rows, cols = gray.shape
+    HP_Filter = np.zeros(original_log.shape)
+    D0 = max(rows, cols)
+    for i in range(rows):
+        for j in range(cols):
+            # rh = 2 rl = 0.2 c = 0.1
+            temp = (i - rows / 2) ** 2 + (j - cols / 2) ** 2
+            HP_Filter[i, j] = (2 - 0.2) * (1 - np.exp(- 0.1 * temp / (2 * (D0 ** 2)))) + 0.2
 
-    # 傅里叶变换
-    gray_fft = np.fft.fft2(gray)
+    F = np.fft.ifftshift(original_log_F * HP_Filter)
 
-    # 将零频点移到频谱的中间，就是中间化处理
-    gray_fftshift = np.fft.fftshift(gray_fft)
+    # 3 反运算得到处理后图像
+    f = np.fft.ifft2(F).real
+    newf = np.exp(f) - 1
+    mi = np.min(newf)
+    ma = np.max(newf)
+    rang = ma - mi
+    for i in range(rows):
+        for j in range(cols):
+            newf[i, j] = (newf[i, j] - mi) / rang
 
-    # 生成一个和gray_fftshift一样的全零数据结构
-    dst_fftshift = np.zeros_like(gray_fftshift)
-
-    # arange函数用于创建等差数组，分解f(x,y)=i(x,y)r(x,y)
-    M, N = np.meshgrid(np.arange(-cols // 2, cols // 2), np.arange(-rows // 2, rows // 2))  # 注意，//就是除法
-
-    # 使用频率增强函数处理原函数（也就是处理原图像dst_fftshift）
-    D = np.sqrt(M ** 2 + N ** 2)  # **2是平方
-    Z = (rh - r1) * (1 - np.exp(-c * (D ** 2 / d0 ** 2))) + r1
-    dst_fftshift = Z * gray_fftshift
-    dst_fftshift = (h - l) * dst_fftshift + l
-
-    # 傅里叶反变换（之前是正变换，现在该反变换变回去了）
-    dst_ifftshift = np.fft.ifftshift(dst_fftshift)
-    dst_ifft = np.fft.ifft2(dst_ifftshift)
-
-    # 选取元素的实部
-    dst = np.real(dst_ifft)
-
-    # dst中，比0小的都会变成0，比0大的都变成255
-    # uint8是专门用于存储各种图像的（包括RGB，灰度图像等），范围是从0–255
-    dst = np.uint8(np.clip(dst, 0, 255))
-    return dst
-def homomorphic_filterDefogging(img):
-
-    out = homomorphic_filter(img.transpose((2, 1, 0)))
-    print(out.shape)
-    out = out.transpose((2, 1, 0))
+    return newf
+def HomorphicFilteringDefogging(img):
+    # img = img[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW
+    # (678, 1019, 3)
+    img = img.transpose((1,2,0))
+    r = img[:, :, 0]
+    g = img[:, :, 1]
+    b = img[:, :, 2]
+    f_d_grayr = HomorphicFiltering(r)
+    f_d_grayg = HomorphicFiltering(g)
+    f_d_grayb = HomorphicFiltering(b)
+    out = cv2.merge([f_d_grayr, f_d_grayg, f_d_grayb])
+    plt.figure("Image")
+    plt.imshow(out)
+    plt.show()
+    out = out.transpose((2, 0, 1)) #HWC to CHW
     return out
+
+
+
 
