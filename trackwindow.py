@@ -359,6 +359,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         for frame_idx, (path, im, im0s, vid_cap, s) in enumerate(dataset):
             t1 = time_sync()
+
+            im = deHazeDefogging(im)
+
             im = torch.from_numpy(im).to(self.device)
             im = im.half() if half else im.float()  # uint8 to fp16/32
             im /= 255.0  # 0 - 255 to 0.0 - 1.0

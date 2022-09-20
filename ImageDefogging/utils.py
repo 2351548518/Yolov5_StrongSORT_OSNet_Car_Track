@@ -1,8 +1,5 @@
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-import matplotlib
-matplotlib.use('TkAgg')
 
 
 # 01.py
@@ -53,7 +50,6 @@ def Defog(m, r, eps, w, maxV1):                 # 输入rgb图像，值范围[0,
     '''计算大气遮罩图像V1和光照值A, V1 = 1-t/A'''
     V1 = np.min(m, 2)                           # 得到暗通道图像
     Dark_Channel = zmMinFilterGray(V1, 7)
-
     V1 = guidedfilter(V1, Dark_Channel, r, eps)  # 使用引导滤波优化
     bins = 2000
     ht = np.histogram(V1, bins)                  # 计算大气光照A
@@ -69,7 +65,6 @@ def Defog(m, r, eps, w, maxV1):                 # 输入rgb图像，值范围[0,
 def deHaze(m, r=81, eps=0.001, w=0.95, maxV1=0.80, bGamma=False):
     Y = np.zeros(m.shape)
     Mask_img, A = Defog(m, r, eps, w, maxV1)             # 得到遮罩图像和大气光照
-
     for k in range(3):
         Y[:,:,k] = (m[:,:,k] - Mask_img)/(1-Mask_img/A)  # 颜色校正
     Y = np.clip(Y, 0, 1)
@@ -132,9 +127,6 @@ def HomorphicFilteringDefogging(img):
     f_d_grayg = HomorphicFiltering(g)
     f_d_grayb = HomorphicFiltering(b)
     out = cv2.merge([f_d_grayr, f_d_grayg, f_d_grayb])
-    plt.figure("Image")
-    plt.imshow(out)
-    plt.show()
     out = out.transpose((2, 0, 1)) #HWC to CHW
     return out
 

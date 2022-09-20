@@ -155,8 +155,10 @@ def run(
         t1 = time_sync()
         # 图片预处理一下
         # im = HistogramEqualization(im)
-        # im = deHazeDefogging(im)
-        im = HomorphicFilteringDefogging(im)
+        im = deHazeDefogging(im)
+        # im = HomorphicFilteringDefogging(im)
+
+
         im = torch.from_numpy(im).to(device)
 
         im = im.half() if half else im.float()  # uint8 to fp16/32

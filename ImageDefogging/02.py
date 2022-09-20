@@ -60,5 +60,5 @@ def deHaze(m, r=81, eps=0.001, w=0.95, maxV1=0.80, bGamma=False):
 
 
 if __name__ == '__main__':
-    m = deHaze(cv2.imread('20190708.png') / 255.0) * 255
+    m = deHaze(cv2.imread('test2.jpg') / 255.0) * 255
     cv2.imwrite('20190708_02.png', m)
