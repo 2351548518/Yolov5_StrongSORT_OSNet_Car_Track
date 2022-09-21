@@ -135,7 +135,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         # 文本输入框
         self.classes = None  # filter by class: --class 0, or --class 0 2 3
-
+        # 去雾开关信号与槽绑定
+        self.initRadioSlots()
         # # 按钮信号与槽绑定
         self.initBtnSlots()
         # # 单行文本框信号与槽绑定
@@ -144,7 +145,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # self.initCheckBoxSlots()
 
         # 参数初始设置
-        # self.initParameter()
+        self.initParameter()
         # Initialize
         self.initWeight()
 
@@ -200,6 +201,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # self.StartTrackBtn.clicked.connect(self.btn_StartTrack)
         # 导出当前\n视频帧图片按钮
         self.OutputSaveBtn.clicked.connect(self.btn_OutputSave)
+
+    # 去雾开关信号与槽绑定
+    def initRadioSlots(self):
+        self.radioButtonDefogOpen.toggled.connect(self.rbtn_DefogOpen)
     # 文本输入框信号与槽绑定
     def initLineEditSlots(self):
         # 测试结果放置文件夹
@@ -234,7 +239,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.VideoShowLabel.setScaledContents(True)
         self.VideoShowLabel.setPixmap(pix)
 
-
+    def rbtn_DefogOpen(self):
+        if self.radioButtonDefogOpen.isChecked():
+            self.DefogOpen = True
+        else:
+            self.DefogOpen = False
     def btn_VideoOpen(self):
         print('btn_VideoOpen_open')
         if self.VideoOpenBtn.text() == "停止":
@@ -1001,6 +1010,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.im0 = annotator.result()
                 if show_vid:
                     self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
+                    if self.DefogOpen:
+                        im0modify = cv2.cvtColor(im0s, cv2.COLOR_BGR2BGRA)
+                        resulttmp = np.zeros((im0modify.shape[0], im0modify.shape[1] * 2, 4))
+                        resulttmp[:, :im0modify.shape[1], :] = im0modify.copy()
+                        resulttmp[:, im0modify.shape[1]:, :] = self.result.copy()
+                        resulttmp = np.array(resulttmp, dtype=np.uint8)
+                        self.result = resulttmp
                     # self.result = cv2.resize(self.result, (640, 480), interpolation=cv2.INTER_AREA)
                     self.QtImg = QtGui.QImage(self.result.data, self.result.shape[1], self.result.shape[0],
                                               QtGui.QImage.Format_RGB32)
@@ -1027,8 +1043,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             # 停止检测
             if self.stopEvent.is_set() == True:
-                if self.cap.isOpened():
-                    self.cap.release()
+                # if self.cap.isOpened():
+                # self.cap.release()
                 self.stopEvent.clear()
                 self.initLogo()
                 break

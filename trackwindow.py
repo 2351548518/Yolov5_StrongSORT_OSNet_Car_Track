@@ -360,6 +360,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             im = deHazeDefogging(im)
 
+
+
             im = torch.from_numpy(im).to(self.device)
             im = im.half() if half else im.float()  # uint8 to fp16/32
             im /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -398,6 +400,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     else:
                         txt_file_name = p.parent.name  # get folder name containing current img
                         save_path = str(save_dir / p.parent.name)  # im.jpg, vid.mp4, ...
+
                 curr_frames[i] = im0
 
                 txt_path = str(save_dir / 'tracks' / txt_file_name)  # im.txt
@@ -487,7 +490,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 # 主要修改的地方
                 self.im0 = annotator.result()
                 if show_vid:
+
+                    # 图片拼接
                     self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
+                    im0modify = cv2.cvtColor(im0s,cv2.COLOR_BGR2BGRA)
+                    resulttmp = np.zeros((im0modify.shape[0],im0modify.shape[1] * 2,4))
+                    resulttmp[:,:im0modify.shape[1],:] = im0modify.copy()
+                    resulttmp[:, im0modify.shape[1]:,:] = self.result.copy()
+                    resulttmp = np.array(resulttmp,dtype=np.uint8)
+                    self.result = resulttmp
+
                     # self.result = cv2.resize(self.result, (640, 480), interpolation=cv2.INTER_AREA)
                     self.QtImg = QtGui.QImage(self.result.data, self.result.shape[1], self.result.shape[0],
                                               QtGui.QImage.Format_RGB32)
