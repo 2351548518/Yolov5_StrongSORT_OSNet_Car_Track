@@ -91,6 +91,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Initialize
         self.initWeight()
 
+    # 初始化信号与槽
     def initSlots(self):
         self.picButton.clicked.connect(self.button_image_open)
         self.weightButton.clicked.connect(self.button_weight_open)
@@ -108,10 +109,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         pix = QtGui.QPixmap('UI/YOLO.png')
         self.label.setScaledContents(True)
         self.label.setPixmap(pix)
-        print("initLogo")
 
     def button_image_open(self):
-        print('button_image_open')
         if self.picButton.text() == "Stop":
             self.stopEvent.set()
             self.camButton.setEnabled(True)
@@ -136,8 +135,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def button_weight_open(self):
         print('button_weight_open')
-        weight_name, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "选择权重", "", "*.pt")  # All Files(*)
+        weight_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选择权重", "", "*.pt")  # All Files(*)
         if not weight_name:
             return
         self.yolo_weights = str(weight_name)
@@ -516,6 +514,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
             # 停止检测
             if self.stopEvent.is_set() == True:
+                # cap.isOpened() 判断视频对象是否成功读取，成功读取视频对象返回True。
                 if self.cap.isOpened():
                     self.cap.release()
                 self.stopEvent.clear()

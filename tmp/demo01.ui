@@ -83,7 +83,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>177</width>
+           <width>183</width>
            <height>1000</height>
           </rect>
          </property>
@@ -307,6 +307,13 @@
               </widget>
              </item>
              <item>
+              <widget class="QCheckBox" name="checkBoxsave_conf">
+               <property name="text">
+                <string>置信度保存</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QCheckBox" name="checkBoxsave_crop">
                <property name="text">
                 <string>目标保存</string>
@@ -418,6 +425,25 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="QPushButton" name="StartTrackBtn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>开始跟踪</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -510,7 +536,7 @@
      <x>0</x>
      <y>0</y>
      <width>1144</width>
-     <height>23</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
