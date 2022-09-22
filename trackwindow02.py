@@ -88,6 +88,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.tflite = None
         self.pb = None
         self.saved_model = None
+        #导出图片使用
+        self.save_image_flag = False
 
         # # 下拉选择框（文件打开按钮）config_strongsort
         # self.config_strongsort = ROOT / 'strong_sort/configs/strong_sort.yaml',
@@ -148,6 +150,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.initParameter()
         # Initialize
         self.initWeight()
+        # 实例化状态栏
+        self.statusBar = QtWidgets.QStatusBar()
+        # 设置状态栏，类似布局设置
+        self.setStatusBar(self.statusBar)
 
     # 参数初始设置
     def initParameter(self):
@@ -305,13 +311,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if not weight_name:
             return
         self.strong_sort_weights = str(weight_name)
-        self.initWeight()
+        # self.initWeight()
 
     # def btn_StartTrack(self):
     #     pass
 
     def btn_OutputSave(self):
-        pass
+        print('btn_OutputSave_open')
+        if self.save_image_flag == False:
+            self.save_image_flag = True
+
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -716,6 +725,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menubar.addAction(self.menu_2.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
 
+
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -821,7 +832,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             exp_name = 'ensemble'
         exp_name = name if name else exp_name + "_" + strong_sort_weights.stem
         # 无修改
-        print("01")
         save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
         # # Load model
@@ -999,17 +1009,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                     save_one_box(bboxes, imc, file=save_dir / 'crops' / txt_file_name / names[
                                         c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
-                    LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
+                    # LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
+                    self.statusBar.showMessage(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)',500)
 
                 else:
                     strongsort_list[i].increment_ages()
-                    LOGGER.info('No detections')
+                    # LOGGER.info('No detections')
+                    self.statusBar.showMessage('No detections',500)
 
                 # Stream results
                 # 主要修改的地方
                 self.im0 = annotator.result()
                 if show_vid:
                     self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
+                    # 去雾开关，增加对比
                     if self.DefogOpen:
                         im0modify = cv2.cvtColor(im0s, cv2.COLOR_BGR2BGRA)
                         resulttmp = np.zeros((im0modify.shape[0], im0modify.shape[1] * 2, 4))
@@ -1024,6 +1037,14 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     self.VideoShowLabel.setScaledContents(True)
                     # cv2.imshow(str(p), self.im0)
                     # cv2.waitKey(1)  # 1 millisecond
+                # 保存当前帧图片
+                if self.save_image_flag:
+                    # QtImgSave = QtGui.QPixmap.fromImage(self.QtImg)
+                    # filename 文件目录 filetype 文件类型
+                    filename,filetype = QtWidgets.QFileDialog.getSaveFileName(self,"保存当前帧图片",'./',"影像 (*.png *.jpg)")
+                    if filename:
+                        self.QtImg.save(filename)
+                    self.save_image_flag = False
 
                 if save_vid:
                     if vid_path[i] != save_path:  # new video
