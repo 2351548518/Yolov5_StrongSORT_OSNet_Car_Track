@@ -1011,6 +1011,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                     # LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
                     self.statusBar.showMessage(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)',500)
+                    self.textEditShowResult.append(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
 
                 else:
                     strongsort_list[i].increment_ages()
