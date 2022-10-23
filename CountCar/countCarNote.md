@@ -16,7 +16,7 @@
 
 先入蓝色线为出
 
-![image-20220927210138907](C:\Users\23515\AppData\Roaming\Typora\typora-user-images\image-20220927210138907.png)
+![image-20220927210138907](https://raw.githubusercontent.com/2351548518/images/main/20220717/202209272101057.png)
 
 852*480
 
@@ -53,4 +53,6 @@
 16:825,250
 
 # 实现代码
+
+![image-20220927223902733](https://raw.githubusercontent.com/2351548518/images/main/20220717/202209272239969.png)
 

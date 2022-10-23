@@ -142,6 +142,8 @@ def run(
     # 开始检测过程
     for frame_idx, (path, im, im0s, vid_cap, s) in enumerate(dataset):
         t1 = time_sync()
+
+
         im = torch.from_numpy(im).to(device)
         im = im.half() if half else im.float()  # uint8 to fp16/32
         im /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -288,7 +290,7 @@ def parse_opt():
     parser.add_argument('--yolo-weights', nargs='+', type=str, default=WEIGHTS / 'yolov5m.pt', help='model.pt path(s)')
     parser.add_argument('--strong-sort-weights', type=str, default=WEIGHTS / 'osnet_x0_25_msmt17.pt')
     parser.add_argument('--config-strongsort', type=str, default='strong_sort/configs/strong_sort.yaml')
-    parser.add_argument('--source', type=str, default='images/17738409_da3-1-16_Trim.mp4', help='file/dir/URL/glob, 0 for webcam')
+    parser.add_argument('--source', type=str, default='0', help='file/dir/URL/glob, 0 for webcam')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.5, help='NMS IoU threshold')

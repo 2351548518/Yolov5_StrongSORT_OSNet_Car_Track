@@ -155,6 +155,8 @@ def run(
         t1 = time_sync()
         # 图片预处理一下
         # im = HistogramEqualization(im)
+        if webcam:
+            im = im.squeeze(0)
         im = deHazeDefogging(im)
         # im = HomorphicFilteringDefogging(im)
 
@@ -325,9 +327,9 @@ def run(
 def parse_opt():
     parser = argparse.ArgumentParser()
     parser.add_argument('--yolo-weights', nargs='+', type=str, default=WEIGHTS / 'yolov5m.pt', help='model.pt path(s)')
-    parser.add_argument('--strong-sort-weights', type=str, default=WEIGHTS / 'osnet_x0_25_msmt17.pt')
+    parser.add_argument('--strong-sort-weights', type=str, default=WEIGHTS / 'weights/osnet_x0_25_market1501.pt')
     parser.add_argument('--config-strongsort', type=str, default='strong_sort/configs/strong_sort.yaml')
-    parser.add_argument('--source', type=str, default='images/17738409_da3-1-16_Trim.mp4',
+    parser.add_argument('--source', type=str, default='0',
                         help='file/dir/URL/glob, 0 for webcam')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.5, help='confidence threshold')

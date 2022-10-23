@@ -45,6 +45,8 @@ from ImageDefogging.utils import *
 # Estimated_speed 测速代码
 from EstimatedSpeed.estimatedspeed import Estimated_speed
 
+# # CountCar 计数代码
+# from CountCar.CountCar import *
 
 # 界面实现 PyQT GUI
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -609,22 +611,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_3.addWidget(self.groupBox_4)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
-        # # 分割线
-        # self.line_3 = QtWidgets.QFrame(self.centralwidget)
-        # self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
-        # self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
-        # self.line_3.setObjectName("line_3")
-        # self.verticalLayout.addWidget(self.line_3)
-        # # 开始跟踪按钮
-        # self.StartTrackBtn = QtWidgets.QPushButton(self.centralwidget)
-        # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        # sizePolicy.setHorizontalStretch(0)
-        # sizePolicy.setVerticalStretch(0)
-        # sizePolicy.setHeightForWidth(self.StartTrackBtn.sizePolicy().hasHeightForWidth())
-        # self.StartTrackBtn.setSizePolicy(sizePolicy)
-        # self.StartTrackBtn.setMinimumSize(QtCore.QSize(0, 0))
-        # self.StartTrackBtn.setObjectName("StartTrackBtn")
-        # self.verticalLayout.addWidget(self.StartTrackBtn)
         self.horizontalLayout_3.addLayout(self.verticalLayout)
         # 分割线
         self.line_7 = QtWidgets.QFrame(self.centralwidget)
@@ -817,8 +803,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         is_file = Path(source).suffix[1:] in (VID_FORMATS)
         is_url = source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
-        # 不能使用wencam
-        webcam = self.webcam
+        # 使用wencam
+        webcam = source.isnumeric() or source.endswith('.txt') or (is_url and not is_file)
+        # webcam = self.webcam
 
         if is_url and is_file:
             source = check_file(source)  # download
@@ -847,7 +834,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             nr_sources = len(dataset)  # batch_size
             self.cap = dataset.cap
             self.camflag = True
-            self.camButton.setText("Stop")
+            self.CameraOpenBtn.setText("停止")
         else:
             dataset = LoadImages(source, img_size=imgsz, stride=self.stride, auto=True)
             nr_sources = 1  # batch_size
@@ -889,8 +876,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         for frame_idx, (path, im, im0s, vid_cap, s) in enumerate(dataset):
             t1 = time_sync()
+            # if webcam:
+            #     im = im.squeeze(0)
 
             im = deHazeDefogging(im)
+
+            # im0s = cv2.add(im0s,color_polygons_image)
 
             im = torch.from_numpy(im).to(self.device)
             im = im.half() if half else im.float()  # uint8 to fp16/32
@@ -1000,6 +991,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                 c = int(cls)  # integer class
                                 id = int(id)  # integer id
                                 # label = None if hide_labels else (f'{id} {names[c]} ' if hide_conf else (f'{id} {conf:.2f}' if hide_class else f'{id} {names[c]} {conf:.2f}'))
+                                # label = None if hide_labels else (f'{id} {names[c]}' if hide_conf else (
+                                #     f'{id} {conf:.2f}' if hide_class else f'{id} {bbox_speed}'))
                                 label = None if hide_labels else (f'{id} {names[c]}' if hide_conf else (
                                     f'{id} {conf:.2f}' if hide_class else f'{id} {bbox_speed}'))
 
