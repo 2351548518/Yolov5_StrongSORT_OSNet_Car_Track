@@ -145,6 +145,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         if self.camflag == False:
             print('button_camera_open')
             self.webcam = True
+            self.camflag = True
             self.picButton.setEnabled(False)
             self.weightButton.setEnabled(False)
             thread2 = Thread(target=self.run,
@@ -314,7 +315,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             dataset = LoadStreams(source, img_size=imgsz, stride=self.stride, auto=self.pt)
             nr_sources = len(dataset)  # batch_size
             self.cap = dataset.cap
-            self.camflag = True
+            # self.camflag = True
             self.camButton.setText("Stop")
         else:
             dataset = LoadImages(source, img_size=imgsz, stride=self.stride, auto=True)
@@ -358,7 +359,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         for frame_idx, (path, im, im0s, vid_cap, s) in enumerate(dataset):
             t1 = time_sync()
 
-            im = deHazeDefogging(im)
+            # im = deHazeDefogging(im)
 
 
 
@@ -493,12 +494,12 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                     # 图片拼接
                     self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
-                    im0modify = cv2.cvtColor(im0s,cv2.COLOR_BGR2BGRA)
-                    resulttmp = np.zeros((im0modify.shape[0],im0modify.shape[1] * 2,4))
-                    resulttmp[:,:im0modify.shape[1],:] = im0modify.copy()
-                    resulttmp[:, im0modify.shape[1]:,:] = self.result.copy()
-                    resulttmp = np.array(resulttmp,dtype=np.uint8)
-                    self.result = resulttmp
+                    # im0modify = cv2.cvtColor(im0s,cv2.COLOR_BGR2BGRA)
+                    # resulttmp = np.zeros((im0modify.shape[0],im0modify.shape[1] * 2,4))
+                    # resulttmp[:,:im0modify.shape[1],:] = im0modify.copy()
+                    # resulttmp[:, im0modify.shape[1]:,:] = self.result.copy()
+                    # resulttmp = np.array(resulttmp,dtype=np.uint8)
+                    # self.result = resulttmp
 
                     # self.result = cv2.resize(self.result, (640, 480), interpolation=cv2.INTER_AREA)
                     self.QtImg = QtGui.QImage(self.result.data, self.result.shape[1], self.result.shape[0],

@@ -62,7 +62,7 @@ class ReIDDetectMultiBackend(nn.Module):
             self.session = onnxruntime.InferenceSession(w, providers=providers)
         
         elif self.tflite:
-            try:  # https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
+            try:
                 from tflite_runtime.interpreter import Interpreter, load_delegate
             except ImportError:
                 import tensorflow as tf

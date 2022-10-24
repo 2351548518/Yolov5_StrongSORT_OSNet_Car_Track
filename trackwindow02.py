@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 
+from PyQt5.QtCore import QObject, pyqtSignal
+
 # limit the number of cpus used by high performance libraries
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["OPENBLAS_NUM_THREADS"] = "1"
@@ -57,8 +59,21 @@ from threading import Thread
 # remove duplicated stream handler to avoid duplicated logging
 logging.getLogger().removeHandler(logging.getLogger().handlers[0])
 
+# class MyTypeSignal(QObject):
+#     sendmsg = pyqtSignal(object)
+#
+#     def run(self):
+#         self.sendmsg.emit("hello")
+#
+# class MySlot(QObject):
+#     def get(self,msg):
+#         print(msg)
+
 @torch.no_grad()
 class Ui_MainWindow(QtWidgets.QMainWindow):
+    sendmsg = pyqtSignal(object)
+
+
 
     def __init__(self, parent=None):
         super().__init__()
@@ -92,6 +107,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.saved_model = None
         #导出图片使用
         self.save_image_flag = False
+        # 记录视频使用
+        self.save_video_flag = False
 
         # # 下拉选择框（文件打开按钮）config_strongsort
         # self.config_strongsort = ROOT / 'strong_sort/configs/strong_sort.yaml',
@@ -116,13 +133,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.device = '' # cuda device, i.e. 0 or 0,1,2,3 or cpu
 
         # 多选框
-        self.show_vid = False  # show results ： 结果展示
+        self.show_vid = True  # show results ： 结果展示
         self.save_txt = False  # save results to *.txt 坐标保存
         self.save_conf = False  # save confidences in --save-txt labels ： 置信度保存
         self.save_crop = False  # save cropped prediction boxes ： 目标保存
-        self.save_vid = False  # save confidences in --save-txt labels ： 预测结果保存
+        self.save_vid = True  # save confidences in --save-txt labels ： 预测结果保存
 
-        self.nosave = False  # do not save images/videos ： 不保存预测结果
+        self.nosave = True  # do not save images/videos ： 不保存预测结果
         self.agnostic_nms = False  # class-agnostic NMS
         self.augment = False  # augmented inference
         self.visualize = False  # visualize features
@@ -192,6 +209,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.checkBoxhalf.setChecked(self.half)
         self.checkBoxdnn.setChecked(self.dnn)
 
+    def Append(self,msg):
+        self.sendmsg.emit(msg)
+    def setappendPlainText(self,msg):
+        self.textEditShowResult.appendPlainText(msg)
+
 
     # 按钮信号与槽绑定
     def initBtnSlots(self):
@@ -209,6 +231,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # self.StartTrackBtn.clicked.connect(self.btn_StartTrack)
         # 导出当前\n视频帧图片按钮
         self.OutputSaveBtn.clicked.connect(self.btn_OutputSave)
+        # 记录视频按钮
+        self.OutputVideoSaveBtn.clicked.connect(self.btn_OutputVideoSave)
+        # 信息展示文本框
+        self.sendmsg.connect(self.setappendPlainText)
 
     # 去雾开关信号与槽绑定
     def initRadioSlots(self):
@@ -272,8 +298,35 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.YoloWeightsBtn.setEnabled(False)
                 self.StrongsortWeightsBtn.setEnabled(False)
             thread1 = Thread(target=self.run,
-                             kwargs={"yolo_weights": self.yolo_weights,"strong_sort_weights":self.strong_sort_weights, "source": str(img_name), "nosave": True,
-                                     "show_vid": True})
+                             kwargs={"yolo_weights": self.yolo_weights,
+                                     "strong_sort_weights":self.strong_sort_weights,
+                                     "source": str(img_name),
+                                     "nosave": self.nosave,
+                                     "conf_thres": self.conf_thres,
+                                     "iou_thres": self.iou_thres,
+                                     "max_det": self.max_det,
+                                     "show_vid": self.show_vid,
+                                     "save_txt": self.save_txt,
+                                     "save_conf": self.save_conf,
+                                     "save_crop": self.save_crop,
+                                     "save_vid": self.save_vid,
+                                     "classes": self.classes,
+                                     "agnostic_nms": self.agnostic_nms,
+                                     "augment": self.augment,
+                                     "visualize": self.visualize,
+                                     "update": self.update,
+                                     "project": self.project,
+                                     "name": self.name,
+                                     "exist_ok": self.exist_ok,
+                                     "line_thickness": self.line_thickness,
+                                     "hide_labels": self.hide_labels,
+                                     "hide_conf": self.hide_conf,
+                                     "hide_class": self.hide_class,
+                                     "hide_speed": self.hide_speed,
+                                     "half": self.half,
+                                     "dnn": self.dnn
+
+                                     })
             thread1.start()
 
 
@@ -285,8 +338,35 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.YoloWeightsBtn.setEnabled(False)
             self.StrongsortWeightsBtn.setEnabled(False)
             thread2 = Thread(target=self.run,
-                             kwargs={"yolo_weights": self.yolo_weights, "strong_sort_weights": self.strong_sort_weights,
-                                     "source": "0", "nosave": True, "show_vid": True})
+                             kwargs={"yolo_weights": self.yolo_weights,
+                                     "strong_sort_weights": self.strong_sort_weights,
+                                     "imgsz":self.imgsz,
+                                     "source": "0",
+                                     "conf_thres":self.conf_thres,
+                                     "iou_thres":self.iou_thres,
+                                     "max_det":self.max_det,
+                                     "show_vid":self.show_vid,
+                                     "save_txt":self.save_txt,
+                                     "save_conf":self.save_conf,
+                                     "save_crop":self.save_crop,
+                                     "save_vid":self.save_vid,
+                                     "nosave":  self.nosave,
+                                     "classes":self.classes,
+                                     "agnostic_nms":self.agnostic_nms,
+                                     "augment":self.augment,
+                                     "visualize":self.visualize,
+                                     "update":self.update,
+                                     "project":self.project,
+                                     "name":self.name,
+                                     "exist_ok":self.exist_ok,
+                                     "line_thickness":self.line_thickness,
+                                     "hide_labels":self.hide_labels,
+                                     "hide_conf":self.hide_conf,
+                                     "hide_class":self.hide_class,
+                                     "hide_speed":self.hide_speed,
+                                     "half":self.half,
+                                     "dnn":self.dnn
+                                     })
             thread2.start()
         else:
             print('button_camera_close')
@@ -296,8 +376,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.VideoOpenBtn.setEnabled(True)
             self.YoloWeightsBtn.setEnabled(True)
             self.StrongsortWeightsBtn.setEnabled(True)
-            self.camButton.setText("打开摄像机")
-            self.initLogo()
+            self.CameraOpenBtn.setText("打开摄像机")
+            # self.initLogo()
 
 
     def btn_YoloWeights(self):
@@ -318,15 +398,23 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     # def btn_StartTrack(self):
     #     pass
 
+    def btn_OutputVideoSave(self):
+        print('btn_OutputVideoSave_open')
+        if not self.save_video_flag:
+            self.save_video_flag = True
+            self.OutputVideoSaveBtn.setText("停止")
+        else:
+            self.save_video_flag = False
+            self.OutputVideoSaveBtn.setText("开始记录\n结果")
     def btn_OutputSave(self):
         print('btn_OutputSave_open')
-        if self.save_image_flag == False:
+        if not self.save_image_flag:
             self.save_image_flag = True
 
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1200, 900)
+        MainWindow.resize(1800, 900)
         # 最外层布局
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -641,6 +729,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.VideoShowLabel = QtWidgets.QLabel(self.centralwidget)
         self.VideoShowLabel.setMinimumSize(QtCore.QSize(640, 400))
         self.VideoShowLabel.setText("")
+        # self.VideoShowLabel.setScaledContents(True)
         self.VideoShowLabel.setObjectName("VideoShowLabel")
         self.verticalLayout_2.addWidget(self.VideoShowLabel)
         # 分割线
@@ -653,7 +742,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         # 结果展示textEdit
-        self.textEditShowResult = QtWidgets.QTextEdit(self.centralwidget)
+        self.textEditShowResult = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.textEditShowResult.setObjectName("textEditShowResult")
         self.horizontalLayout_4.addWidget(self.textEditShowResult)
         # 分割线
@@ -662,6 +751,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_5.setObjectName("line_5")
         self.horizontalLayout_4.addWidget(self.line_5)
+        # 导出当前视频帧图片按钮
+        self.OutputVideoSaveBtn = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.OutputVideoSaveBtn.sizePolicy().hasHeightForWidth())
+        self.OutputVideoSaveBtn.setSizePolicy(sizePolicy)
+        self.OutputVideoSaveBtn.setObjectName("OutputVideoSaveBtn")
+        self.horizontalLayout_4.addWidget(self.OutputVideoSaveBtn)
+
         # 导出当前视频帧图片按钮
         self.OutputSaveBtn = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
@@ -718,7 +817,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "车辆检测跟踪系统"))
         self.VideoOpenBtn.setText(_translate("MainWindow", "打开视频"))
         self.CameraOpenBtn.setText(_translate("MainWindow", "打开摄像机"))
         self.radioButtonDefogOpen.setText(_translate("MainWindow", "去雾开关"))
@@ -755,6 +854,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.checkBoxdnn.setText(_translate("MainWindow", "dnn"))
         # self.StartTrackBtn.setText(_translate("MainWindow", "开始跟踪"))
         self.labelshowresult.setText(_translate("MainWindow", "结果展示"))
+        self.OutputVideoSaveBtn.setText(_translate("MainWindow", "开始记录\n"
+                                                                 "结果"))
         self.OutputSaveBtn.setText(_translate("MainWindow", "导出当前\n"
                                                             "视频帧图片"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
@@ -840,6 +941,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             nr_sources = 1  # batch_size
         vid_path, vid_writer, txt_path = [None] * nr_sources, [None] * nr_sources, [None] * nr_sources
 
+        # 用来记录视频的j
+        j = 0
+
         # initialize StrongSORT
         cfg = get_config()
         cfg.merge_from_file(config_strongsort)
@@ -876,8 +980,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         for frame_idx, (path, im, im0s, vid_cap, s) in enumerate(dataset):
             t1 = time_sync()
-            # if webcam:
-            #     im = im.squeeze(0)
+            if webcam:
+                im = im.squeeze(0)
 
             im = deHazeDefogging(im)
 
@@ -959,6 +1063,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
                     # draw boxes for visualization
                     # outputs存放结果 [l,t,w,h,id,cls,]
+                    SpeedOver = False
                     if len(outputs[i]) > 0:
                         # j第几个框，output结果，conf置信度
                         for j, (output, conf) in enumerate(zip(outputs[i], confs)):
@@ -974,7 +1079,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                             #     bbox_speed = Estimated_speed(outputs_prev[-2], output, id, fps, bbox_width)
                             # else:
                             #     bbox_speed = "unknown"
-                            bbox_speed = Estimated_speed(outputs_prev[-2], output, id, fps, bbox_width)
+                            bbox_speed,SpeedOverFlag = Estimated_speed(outputs_prev[-2], output, id, fps, bbox_width)
+                            if SpeedOverFlag:
+                                SpeedOver = True
 
                             if save_txt:
                                 # to MOT format
@@ -1003,21 +1110,23 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                         c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
                     # LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
-                    self.statusBar.showMessage(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)',500)
-                    # self.textEditShowResult.append(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
+                    # self.statusBar.showMessage(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)',500)
+                    # if SpeedOver:
+                    # self.textEditShowResult.appendPlainText("有疾驶车辆，请小心驾驶")
+                    self.Append("有疾驶车辆，请小心驾驶")
 
                 else:
                     strongsort_list[i].increment_ages()
                     # LOGGER.info('No detections')
-                    self.statusBar.showMessage('No detections',500)
+                    # self.statusBar.showMessage('No detections',500)
 
                 # Stream results
                 # 主要修改的地方
                 self.im0 = annotator.result()
-                if show_vid:
+                if show_vid :
                     self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
                     # 去雾开关，增加对比
-                    if self.DefogOpen:
+                    if self.DefogOpen and webcam == False:
                         im0modify = cv2.cvtColor(im0s, cv2.COLOR_BGR2BGRA)
                         resulttmp = np.zeros((im0modify.shape[0], im0modify.shape[1] * 2, 4))
                         resulttmp[:, :im0modify.shape[1], :] = im0modify.copy()
@@ -1040,7 +1149,22 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                         self.QtImg.save(filename)
                     self.save_image_flag = False
 
-                if save_vid:
+                if self.save_video_flag:
+                    if vid_path[i] != save_path:  # new video
+                        vid_path[i] = save_path
+                        if isinstance(vid_writer[i], cv2.VideoWriter):
+                            vid_writer[i].release()  # release previous video writer
+                        if vid_cap:  # video
+                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                            w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                            h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                        else:  # stream
+                            fps, w, h = 30, im0.shape[1], im0.shape[0]
+                        save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
+                        vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+                    vid_writer[i].write(im0)
+
+                if self.save_vid:
                     if vid_path[i] != save_path:  # new video
                         vid_path[i] = save_path
                         if isinstance(vid_writer[i], cv2.VideoWriter):
@@ -1059,7 +1183,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             # 停止检测
             if self.stopEvent.is_set() == True:
                 # if self.cap.isOpened():
-                # self.cap.release()
+                #   self.cap.release()
                 self.stopEvent.clear()
                 self.initLogo()
                 break

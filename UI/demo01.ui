@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>车辆检测跟踪系统</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,5">
@@ -82,8 +82,8 @@
          <property name="geometry">
           <rect>
            <x>0</x>
-           <y>0</y>
-           <width>177</width>
+           <y>-355</y>
+           <width>181</width>
            <height>1000</height>
           </rect>
          </property>
@@ -481,6 +481,20 @@
          <widget class="Line" name="line_5">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="OutputVideoSaveBtn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>开始记录
+结果</string>
           </property>
          </widget>
         </item>

@@ -5,11 +5,6 @@ import numpy as np
 # 01.py
 def HistogramEqualization(img):
     # img =src[...,::-1].transpose((0, 2, 3, 1))   # RGB to BGR ,BCHW to  BHWC
-    # blue = img[:, :, 0]
-    # green = img[:, :, 1]
-    # red = img[:, :, 2]
-    # img.shape = (3,384,640)
-    # request = (640,384,3)
     red = img[0, :, :]
     green = img[1, :, :]
     blue = img[2, :, :]
@@ -17,7 +12,7 @@ def HistogramEqualization(img):
     green_equ = cv2.equalizeHist(green)
     red_equ = cv2.equalizeHist(red)
     out = cv2.merge([red_equ, green_equ, blue_equ])
-    out = out.transpose((2, 0, 1)) #WHC to CHW
+    out = out.transpose((2, 0, 1))  # WHC to CHW
 
     return out
 
@@ -46,35 +41,37 @@ def guidedfilter(I, p, r, eps):
     return m_a * I + m_b
 
 
-def Defog(m, r, eps, w, maxV1):                 # 输入rgb图像，值范围[0,1]
+def Defog(m, r, eps, w, maxV1):  # 输入rgb图像，值范围[0,1]
     '''计算大气遮罩图像V1和光照值A, V1 = 1-t/A'''
-    V1 = np.min(m, 2)                           # 得到暗通道图像
+    V1 = np.min(m, 2)  # 得到暗通道图像
     Dark_Channel = zmMinFilterGray(V1, 7)
     V1 = guidedfilter(V1, Dark_Channel, r, eps)  # 使用引导滤波优化
     bins = 2000
-    ht = np.histogram(V1, bins)                  # 计算大气光照A
+    ht = np.histogram(V1, bins)  # 计算大气光照A
     d = np.cumsum(ht[0]) / float(V1.size)
     for lmax in range(bins - 1, 0, -1):
         if d[lmax] <= 0.999:
             break
     A = np.mean(m, 2)[V1 >= ht[1][lmax]].max()
-    V1 = np.minimum(V1 * w, maxV1)               # 对值范围进行限制
+    V1 = np.minimum(V1 * w, maxV1)  # 对值范围进行限制
     return V1, A
 
 
 def deHaze(m, r=81, eps=0.001, w=0.95, maxV1=0.80, bGamma=False):
     Y = np.zeros(m.shape)
-    Mask_img, A = Defog(m, r, eps, w, maxV1)             # 得到遮罩图像和大气光照
+    Mask_img, A = Defog(m, r, eps, w, maxV1)  # 得到遮罩图像和大气光照
     for k in range(3):
-        Y[:,:,k] = (m[:,:,k] - Mask_img)/(1-Mask_img/A)  # 颜色校正
+        Y[:, :, k] = (m[:, :, k] - Mask_img) / (1 - Mask_img / A)  # 颜色校正
     Y = np.clip(Y, 0, 1)
     if bGamma:
-        Y = Y ** (np.log(0.5) / np.log(Y.mean()))       # gamma校正,默认不进行该操作
+        Y = Y ** (np.log(0.5) / np.log(Y.mean()))  # gamma校正,默认不进行该操作
     return Y
+
+
 def deHazeDefogging(img):
     # img.shape = (3,384,640)
     # request = (640,384,3)
-    out = deHaze(img.transpose((2, 1, 0))/255.0) * 255
+    out = deHaze(img.transpose((2, 1, 0)) / 255.0) * 255
     out = out.transpose((2, 1, 0))
     return out
 
@@ -116,10 +113,12 @@ def HomorphicFiltering(original):
             newf[i, j] = (newf[i, j] - mi) / rang
 
     return newf
+
+
 def HomorphicFilteringDefogging(img):
     # img = img[..., ::-1].transpose((0, 3, 1, 2))  # BGR to RGB, BHWC to BCHW
     # (678, 1019, 3)
-    img = img.transpose((1,2,0))
+    img = img.transpose((1, 2, 0))
     r = img[:, :, 0]
     g = img[:, :, 1]
     b = img[:, :, 2]
@@ -127,9 +126,5 @@ def HomorphicFilteringDefogging(img):
     f_d_grayg = HomorphicFiltering(g)
     f_d_grayb = HomorphicFiltering(b)
     out = cv2.merge([f_d_grayr, f_d_grayg, f_d_grayb])
-    out = out.transpose((2, 0, 1)) #HWC to CHW
+    out = out.transpose((2, 0, 1))  # HWC to CHW
     return out
-
-
-
-

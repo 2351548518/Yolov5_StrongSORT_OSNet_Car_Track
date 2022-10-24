@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
 
 # Form implementation generated from reading ui file 'demo01.ui'
 #
@@ -10,18 +9,12 @@ import sys
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import *
 
 
-class Ui_MainWindow(QtWidgets.QMainWindow):
-
-    def __init__(self):
-        super().__init__()
-        self.setupUi(self)
-
+class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1148, 828)
+        MainWindow.resize(1144, 819)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.centralwidget)
@@ -59,7 +52,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 181, 1000))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -355, 181, 1000))
         self.scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 1000))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
@@ -197,9 +190,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.checkBoxsave_txt = QtWidgets.QCheckBox(self.groupBox_4)
         self.checkBoxsave_txt.setObjectName("checkBoxsave_txt")
         self.verticalLayout_4.addWidget(self.checkBoxsave_txt)
-        self.checkBoxsave_conf = QtWidgets.QCheckBox(self.groupBox_4)
-        self.checkBoxsave_conf.setObjectName("checkBoxsave_conf")
-        self.verticalLayout_4.addWidget(self.checkBoxsave_conf)
         self.checkBoxsave_crop = QtWidgets.QCheckBox(self.groupBox_4)
         self.checkBoxsave_crop.setObjectName("checkBoxsave_crop")
         self.verticalLayout_4.addWidget(self.checkBoxsave_crop)
@@ -250,15 +240,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_3.setObjectName("line_3")
         self.verticalLayout.addWidget(self.line_3)
-        self.StartTrackBtn = QtWidgets.QPushButton(self.centralwidget)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.StartTrackBtn.sizePolicy().hasHeightForWidth())
-        self.StartTrackBtn.setSizePolicy(sizePolicy)
-        self.StartTrackBtn.setMinimumSize(QtCore.QSize(0, 0))
-        self.StartTrackBtn.setObjectName("StartTrackBtn")
-        self.verticalLayout.addWidget(self.StartTrackBtn)
         self.horizontalLayout_3.addLayout(self.verticalLayout)
         self.line_7 = QtWidgets.QFrame(self.centralwidget)
         self.line_7.setFrameShape(QtWidgets.QFrame.VLine)
@@ -301,6 +282,17 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_5.setObjectName("line_5")
         self.horizontalLayout_4.addWidget(self.line_5)
+
+        self.OutputVideoSaveBtn = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.OutputVideoSaveBtn.sizePolicy().hasHeightForWidth())
+        self.OutputVideoSaveBtn.setSizePolicy(sizePolicy)
+        self.OutputVideoSaveBtn.setObjectName("OutputVideoSaveBtn")
+        self.horizontalLayout_4.addWidget(self.OutputVideoSaveBtn)
+
+
         self.OutputSaveBtn = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -318,7 +310,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.horizontalLayout_3.setStretch(2, 5)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1148, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1144, 23))
         self.menubar.setObjectName("menubar")
         self.menu = QtWidgets.QMenu(self.menubar)
         self.menu.setObjectName("menu")
@@ -351,7 +343,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "车辆检测跟踪系统"))
         self.VideoOpenBtn.setText(_translate("MainWindow", "打开视频"))
         self.CameraOpenBtn.setText(_translate("MainWindow", "打开摄像机"))
         self.radioButtonDefogOpen.setText(_translate("MainWindow", "去雾开关"))
@@ -371,7 +363,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.groupBox_4.setTitle(_translate("MainWindow", "功能开关"))
         self.checkBoxshow_vid.setText(_translate("MainWindow", "结果展示"))
         self.checkBoxsave_txt.setText(_translate("MainWindow", "坐标保存"))
-        self.checkBoxsave_conf.setText(_translate("MainWindow", "置信度保存"))
         self.checkBoxsave_crop.setText(_translate("MainWindow", "目标保存"))
         self.checkBoxsave_vid.setText(_translate("MainWindow", "预测结果保存"))
         self.checkBoxnosave.setText(_translate("MainWindow", "不保存预测结果"))
@@ -386,10 +377,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.checkBoxhide_speed.setText(_translate("MainWindow", "hide_speed"))
         self.checkBoxhalf.setText(_translate("MainWindow", "half"))
         self.checkBoxdnn.setText(_translate("MainWindow", "dnn"))
-        self.StartTrackBtn.setText(_translate("MainWindow", "开始跟踪"))
         self.labelshowresult.setText(_translate("MainWindow", "结果展示"))
+        self.OutputVideoSaveBtn.setText(_translate("MainWindow", "开始记录\n"
+"结果"))
         self.OutputSaveBtn.setText(_translate("MainWindow", "导出当前\n"
-                                                            "视频帧图片"))
+"视频帧图片"))
         self.menu.setTitle(_translate("MainWindow", "文件"))
         self.menu_2.setTitle(_translate("MainWindow", "设置"))
         self.menu_3.setTitle(_translate("MainWindow", "帮助"))
@@ -397,10 +389,3 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actioninterface.setText(_translate("MainWindow", "Interface"))
         self.actionDocumentation.setText(_translate("MainWindow", "Documentation"))
         self.actionAbout.setText(_translate("MainWindow", "About"))
-
-
-if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
-    ui = Ui_MainWindow()
-    ui.show()
-    sys.exit(app.exec_())

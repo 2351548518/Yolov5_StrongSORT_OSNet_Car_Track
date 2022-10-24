@@ -61,7 +61,7 @@ class Evaluator(object):
         self.acc.update(gt_ids, trk_ids, iou_distance)
 
         if rtn_events and iou_distance.size > 0 and hasattr(self.acc, 'last_mot_events'):
-            events = self.acc.last_mot_events  # only supported by https://github.com/longcw/py-motmetrics
+            events = self.acc.last_mot_events
         else:
             events = None
         return events

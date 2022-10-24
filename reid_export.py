@@ -120,7 +120,7 @@ def export_openvino(file, dynamic, half, prefix=colorstr('OpenVINO:')):
     f = str(file).replace('.onnx', f'_openvino_model{os.sep}')
     # YOLOv5 OpenVINO export
     try:
-        check_requirements(('openvino-dev',))  # requires openvino-dev: https://pypi.org/project/openvino-dev/
+        check_requirements(('openvino-dev',))
         import openvino.inference_engine as ie
 
         LOGGER.info(f'\n{prefix} starting export with openvino {ie.__version__}...')
@@ -146,7 +146,7 @@ def export_openvino(file, dynamic, half, prefix=colorstr('OpenVINO:')):
 def export_tflite(file, half, prefix=colorstr('TFLite:')):
     # YOLOv5 OpenVINO export
     try:
-        check_requirements(('openvino2tensorflow', 'tensorflow', 'tensorflow_datasets'))  # requires openvino-dev: https://pypi.org/project/openvino-dev/
+        check_requirements(('openvino2tensorflow', 'tensorflow', 'tensorflow_datasets'))
         import openvino.inference_engine as ie
         LOGGER.info(f'\n{prefix} starting export with openvino {ie.__version__}...')
         output = Path(str(file).replace(f'_openvino_model{os.sep}', f'_tflite_model{os.sep}'))

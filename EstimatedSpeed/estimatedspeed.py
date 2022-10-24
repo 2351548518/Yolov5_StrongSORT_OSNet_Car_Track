@@ -1,7 +1,6 @@
 import math
-
-
 def Estimated_speed(outputs, output, id, fps, width):
+    SpeedOver = False
     prev_IDs = []  # 之前的ids
     work_IDs = []  # 有效的ids
     work_locations = output  # 当前帧数据：中心点x坐标、中心点y坐标、目标序号、车辆类别、车辆像素宽度
@@ -19,7 +18,9 @@ def Estimated_speed(outputs, output, id, fps, width):
         speed = ((math.sqrt(
             (work_locations[0] - work_prev_locations[0]) ** 2 + (work_locations[1] - work_prev_locations[1]) ** 2) /
                  width )*5 * fps  * 3.6 )
+        if speed > 10:
+            SpeedOver = True
         # speed = 11.3
         speed = str(round(speed, 1)) + "km/h"
-        return speed
-    return "unknown"
+        return speed,SpeedOver
+    return "unknown",SpeedOver

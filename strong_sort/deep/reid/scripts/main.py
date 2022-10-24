@@ -16,7 +16,6 @@ from default_config import (
     get_default_config, lr_scheduler_kwargs
 )
 
-
 def build_datamanager(cfg):
     if cfg.data.type == 'image':
         return torchreid.data.ImageDataManager(**imagedata_kwargs(cfg))

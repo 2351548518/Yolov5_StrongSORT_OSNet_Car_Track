@@ -1,10 +1,7 @@
 import numpy as np
 import cv2
-
 width = 852
 height = 480
-
-
 
 # 填充第一个撞线polygon（蓝色）
 # 四个点
