@@ -10,8 +10,6 @@ os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
 os.environ["NUMEXPR_NUM_THREADS"] = "1"
 
-
-
 import sys
 import numpy as np
 from pathlib import Path
@@ -59,21 +57,10 @@ from threading import Thread
 # remove duplicated stream handler to avoid duplicated logging
 logging.getLogger().removeHandler(logging.getLogger().handlers[0])
 
-# class MyTypeSignal(QObject):
-#     sendmsg = pyqtSignal(object)
-#
-#     def run(self):
-#         self.sendmsg.emit("hello")
-#
-# class MySlot(QObject):
-#     def get(self,msg):
-#         print(msg)
 
 @torch.no_grad()
 class Ui_MainWindow(QtWidgets.QMainWindow):
     sendmsg = pyqtSignal(object)
-
-
 
     def __init__(self, parent=None):
         super().__init__()
@@ -82,7 +69,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.initLogo()
 
         # 去雾开关：单选框
-        self.DefogOpen = True
+        self.DefogOpen = False
 
         # 设置默认值
         # 下拉选择框(文件打开按钮) yolo权重
@@ -105,7 +92,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.tflite = None
         self.pb = None
         self.saved_model = None
-        #导出图片使用
+        # 导出图片使用
         self.save_image_flag = False
         # 记录视频使用
         self.save_video_flag = False
@@ -122,24 +109,24 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # 文本输入框 ：输入图片的大小
         self.imgsz = (640, 640)  # inference size (height, width)
         # 滑动条或者文本输入框 ： 置信度阈值：浮点校验器 [0，1]，精度：小数点后2位
-        self.conf_thres = 0.25 # confidence threshold
+        self.conf_thres = 0.25  # confidence threshold
         # 滑动条或者文本输入框 ： nms的iou阈值 ：浮点校验器 [0，1]，精度：小数点后2位
-        self.iou_thres = 0.45# NMS IOU threshold
+        self.iou_thres = 0.45  # NMS IOU threshold
         # 文本输入框 ： 图片最多目标数量 ：整数校验器 （1，1000）
         self.max_det = 1000  # maximum detections per image
         # 文本输入框 ： 框线宽度（pixels）： 整数校验器 （1，5）
         self.line_thickness = 3  # bounding box thickness (pixels)
         # 下拉选择框 ：
-        self.device = '' # cuda device, i.e. 0 or 0,1,2,3 or cpu
+        self.device = ''  # cuda device, i.e. 0 or 0,1,2,3 or cpu
 
         # 多选框
         self.show_vid = True  # show results ： 结果展示
         self.save_txt = False  # save results to *.txt 坐标保存
         self.save_conf = False  # save confidences in --save-txt labels ： 置信度保存
         self.save_crop = False  # save cropped prediction boxes ： 目标保存
-        self.save_vid = True  # save confidences in --save-txt labels ： 预测结果保存
+        self.save_vid = False  # save confidences in --save-txt labels ： 预测结果保存
 
-        self.nosave = True  # do not save images/videos ： 不保存预测结果
+        self.nosave = False  # do not save images/videos ： 不保存预测结果
         self.agnostic_nms = False  # class-agnostic NMS
         self.augment = False  # augmented inference
         self.visualize = False  # visualize features
@@ -209,11 +196,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.checkBoxhalf.setChecked(self.half)
         self.checkBoxdnn.setChecked(self.dnn)
 
-    def Append(self,msg):
+    def Append(self, msg):
         self.sendmsg.emit(msg)
-    def setappendPlainText(self,msg):
-        self.textEditShowResult.appendPlainText(msg)
 
+    def setappendPlainText(self, msg):
+        self.textEditShowResult.appendPlainText(msg)
 
     # 按钮信号与槽绑定
     def initBtnSlots(self):
@@ -235,10 +222,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.OutputVideoSaveBtn.clicked.connect(self.btn_OutputVideoSave)
         # 信息展示文本框
         self.sendmsg.connect(self.setappendPlainText)
+        # 参数更新按钮
+        self.pushButtonParameterSet.clicked.connect(self.initCheckBoxSet)
 
     # 去雾开关信号与槽绑定
     def initRadioSlots(self):
         self.radioButtonDefogOpen.toggled.connect(self.rbtn_DefogOpen)
+
     # 文本输入框信号与槽绑定
     def initLineEditSlots(self):
         # 测试结果放置文件夹
@@ -256,8 +246,37 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # 框线宽度（pixels）
         self.line_thicknesslineEdit.editingFinished.connect(self.ledit_line_thicknesslineEdit)
 
-    def initCheckBoxSlots(self):
-        pass
+    def initCheckBoxSet(self):
+        # 文本输入框
+        self.project = self.ProjectLineEdit.text()
+        self.name = self.NamelineEdit.text()
+        self.imgsz = eval(self.imgszlineEdit.text())
+        self.conf_thres = eval(self.conf_threslineEdit.text())
+        self.iou_thres = eval(self.iou_threslineEdit.text())
+        self.max_det = eval(self.max_detlineEdit.text())
+        self.line_thickness = eval(self.line_thicknesslineEdit.text())
+
+        # 复选框
+        self.show_vid = self.checkBoxshow_vid.isChecked()
+        self.save_txt = self.checkBoxsave_txt.isChecked()
+        self.save_conf = self.checkBoxsave_conf.isChecked()
+        self.save_crop = self.checkBoxsave_crop.isChecked()
+        self.save_vid = self.checkBoxsave_vid.isChecked()
+
+        self.nosave = self.checkBoxnosave.isChecked()
+        self.agnostic_nms = self.checkBoxagnostic_nms.isChecked()
+        self.augment = self.checkBoxaugment.isChecked()
+        self.visualize = self.checkBoxvisualize.isChecked()
+        self.update = self.checkBoxupdate.isChecked()
+
+        self.exist_ok = self.checkBoxexist_ok.isChecked()
+        self.hide_labels = self.checkBoxhide_labels.isChecked()
+        self.hide_conf = self.checkBoxhide_conf.isChecked()
+        self.hide_class = self.checkBoxhide_class.isChecked()
+        self.hide_speed = self.checkBoxhide_speed.isChecked()
+
+        self.half = self.checkBoxhalf.isChecked()
+        self.dnn = self.checkBoxdnn.isChecked()
 
     def initWeight(self):
         self.device = select_device(self.device)
@@ -266,7 +285,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         # Load model 只能使用pt模型
         self.model = DetectMultiBackend(self.yolo_weights, device=self.device, dnn=self.dnn, data=None, fp16=self.half)
         self.stride, self.names, self.pt = self.model.stride, self.model.names, self.model.pt
-
 
     def initLogo(self):
         pix = QtGui.QPixmap('UI/YOLO.png')
@@ -278,6 +296,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.DefogOpen = True
         else:
             self.DefogOpen = False
+
     def btn_VideoOpen(self):
         print('btn_VideoOpen_open')
         if self.VideoOpenBtn.text() == "停止":
@@ -299,7 +318,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 self.StrongsortWeightsBtn.setEnabled(False)
             thread1 = Thread(target=self.run,
                              kwargs={"yolo_weights": self.yolo_weights,
-                                     "strong_sort_weights":self.strong_sort_weights,
+                                     "strong_sort_weights": self.strong_sort_weights,
                                      "source": str(img_name),
                                      "nosave": self.nosave,
                                      "conf_thres": self.conf_thres,
@@ -329,7 +348,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                      })
             thread1.start()
 
-
     def btn_CameraOpen(self):
         if self.camflag == False:
             print('button_camera_open')
@@ -340,32 +358,32 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             thread2 = Thread(target=self.run,
                              kwargs={"yolo_weights": self.yolo_weights,
                                      "strong_sort_weights": self.strong_sort_weights,
-                                     "imgsz":self.imgsz,
+                                     "imgsz": self.imgsz,
                                      "source": "0",
-                                     "conf_thres":self.conf_thres,
-                                     "iou_thres":self.iou_thres,
-                                     "max_det":self.max_det,
-                                     "show_vid":self.show_vid,
-                                     "save_txt":self.save_txt,
-                                     "save_conf":self.save_conf,
-                                     "save_crop":self.save_crop,
-                                     "save_vid":self.save_vid,
-                                     "nosave":  self.nosave,
-                                     "classes":self.classes,
-                                     "agnostic_nms":self.agnostic_nms,
-                                     "augment":self.augment,
-                                     "visualize":self.visualize,
-                                     "update":self.update,
-                                     "project":self.project,
-                                     "name":self.name,
-                                     "exist_ok":self.exist_ok,
-                                     "line_thickness":self.line_thickness,
-                                     "hide_labels":self.hide_labels,
-                                     "hide_conf":self.hide_conf,
-                                     "hide_class":self.hide_class,
-                                     "hide_speed":self.hide_speed,
-                                     "half":self.half,
-                                     "dnn":self.dnn
+                                     "conf_thres": self.conf_thres,
+                                     "iou_thres": self.iou_thres,
+                                     "max_det": self.max_det,
+                                     "show_vid": self.show_vid,
+                                     "save_txt": self.save_txt,
+                                     "save_conf": self.save_conf,
+                                     "save_crop": self.save_crop,
+                                     "save_vid": self.save_vid,
+                                     "nosave": self.nosave,
+                                     "classes": self.classes,
+                                     "agnostic_nms": self.agnostic_nms,
+                                     "augment": self.augment,
+                                     "visualize": self.visualize,
+                                     "update": self.update,
+                                     "project": self.project,
+                                     "name": self.name,
+                                     "exist_ok": self.exist_ok,
+                                     "line_thickness": self.line_thickness,
+                                     "hide_labels": self.hide_labels,
+                                     "hide_conf": self.hide_conf,
+                                     "hide_class": self.hide_class,
+                                     "hide_speed": self.hide_speed,
+                                     "half": self.half,
+                                     "dnn": self.dnn
                                      })
             thread2.start()
         else:
@@ -379,7 +397,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.CameraOpenBtn.setText("打开摄像机")
             # self.initLogo()
 
-
     def btn_YoloWeights(self):
         print('btn_YoloWeights_open')
         weight_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选择Yolo权重", "", "*.pt")  # All Files(*)
@@ -387,6 +404,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             return
         self.yolo_weights = str(weight_name)
         self.initWeight()
+
     def btn_StrongsortWeights(self):
         print('btn_StrongsortWeights_open')
         weight_name, _ = QtWidgets.QFileDialog.getOpenFileName(self, "选择strong_sort权重", "", "*.pt")  # All Files(*)
@@ -406,15 +424,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         else:
             self.save_video_flag = False
             self.OutputVideoSaveBtn.setText("开始记录\n结果")
+
     def btn_OutputSave(self):
         print('btn_OutputSave_open')
         if not self.save_image_flag:
             self.save_image_flag = True
 
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1800, 900)
+        MainWindow.resize(1600, 900)
         # 最外层布局
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -567,7 +585,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_5.addWidget(self.labelconf_thres)
         # 置信度阈值 浮点校验器 [0，1]，精度：小数点后2位
         doubleValidator_conf_threslineEdit = QDoubleValidator(self)
-        doubleValidator_conf_threslineEdit.setRange(0,1)
+        doubleValidator_conf_threslineEdit.setRange(0, 1)
         doubleValidator_conf_threslineEdit.setNotation(QDoubleValidator.StandardNotation)
         doubleValidator_conf_threslineEdit.setDecimals(2)
         # 置信度阈值 文本输入框
@@ -585,7 +603,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         sizePolicy.setHeightForWidth(self.labeliou_thres.sizePolicy().hasHeightForWidth())
         # nms的iou阈值 ：浮点校验器[0，1]，精度：小数点后2位
         doubleValidator_labeliou_thres = QDoubleValidator(self)
-        doubleValidator_labeliou_thres.setRange(0,1)
+        doubleValidator_labeliou_thres.setRange(0, 1)
         doubleValidator_labeliou_thres.setNotation(QDoubleValidator.StandardNotation)
         doubleValidator_labeliou_thres.setDecimals(2)
         self.labeliou_thres.setSizePolicy(sizePolicy)
@@ -609,7 +627,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.max_detlineEdit.setObjectName("max_detlineEdit")
         # 文本输入框 ： 图片最多目标数量 ：整数校验器 （1，1000）
         intValidator_max_detlineEdit = QIntValidator(self)
-        intValidator_max_detlineEdit.setRange(1,1000)
+        intValidator_max_detlineEdit.setRange(1, 1000)
         self.max_detlineEdit.setValidator(intValidator_max_detlineEdit)
 
         self.verticalLayout_5.addWidget(self.max_detlineEdit)
@@ -627,7 +645,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.line_thicknesslineEdit.setObjectName("line_thicknesslineEdit")
         # 文本输入框 ： 框线宽度（pixels）： 整数校验器 （1，9）
         intValidator_line_thicknesslineEdit = QIntValidator(self)
-        intValidator_line_thicknesslineEdit.setRange(1,9)
+        intValidator_line_thicknesslineEdit.setRange(1, 9)
         self.line_thicknesslineEdit.setValidator(intValidator_line_thicknesslineEdit)
         self.verticalLayout_5.addWidget(self.line_thicknesslineEdit)
 
@@ -699,6 +717,16 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.verticalLayout_3.addWidget(self.groupBox_4)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
+
+        self.pushButtonParameterSet = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButtonParameterSet.sizePolicy().hasHeightForWidth())
+        self.pushButtonParameterSet.setSizePolicy(sizePolicy)
+        self.pushButtonParameterSet.setObjectName("pushButtonParameterSet")
+        self.verticalLayout.addWidget(self.pushButtonParameterSet)
+
         self.horizontalLayout_3.addLayout(self.verticalLayout)
         # 分割线
         self.line_7 = QtWidgets.QFrame(self.centralwidget)
@@ -810,8 +838,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menubar.addAction(self.menu_2.menuAction())
         self.menubar.addAction(self.menu_3.menuAction())
 
-
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -852,6 +878,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.checkBoxhide_speed.setText(_translate("MainWindow", "hide_speed"))
         self.checkBoxhalf.setText(_translate("MainWindow", "half"))
         self.checkBoxdnn.setText(_translate("MainWindow", "dnn"))
+        self.pushButtonParameterSet.setText(_translate("MainWindow", "更新参数"))
         # self.StartTrackBtn.setText(_translate("MainWindow", "开始跟踪"))
         self.labelshowresult.setText(_translate("MainWindow", "结果展示"))
         self.OutputVideoSaveBtn.setText(_translate("MainWindow", "开始记录\n"
@@ -865,6 +892,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actioninterface.setText(_translate("MainWindow", "Interface"))
         self.actionDocumentation.setText(_translate("MainWindow", "Documentation"))
         self.actionAbout.setText(_translate("MainWindow", "About"))
+
     @torch.no_grad()
     def run(
             self,
@@ -921,7 +949,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         exp_name = name if name else exp_name + "_" + strong_sort_weights.stem
         # 无修改
         save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-        (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+        (save_dir / 'tracks' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
         # # Load model
         classify = False
         imgsz = check_img_size(imgsz, s=self.stride)  # check image size
@@ -941,8 +969,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             nr_sources = 1  # batch_size
         vid_path, vid_writer, txt_path = [None] * nr_sources, [None] * nr_sources, [None] * nr_sources
 
-        # 用来记录视频的j
-        j = 0
 
         # initialize StrongSORT
         cfg = get_config()
@@ -983,7 +1009,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             if webcam:
                 im = im.squeeze(0)
 
-            im = deHazeDefogging(im)
+            # im = deHazeDefogging(im)
 
             # im0s = cv2.add(im0s,color_polygons_image)
 
@@ -1079,7 +1105,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                             #     bbox_speed = Estimated_speed(outputs_prev[-2], output, id, fps, bbox_width)
                             # else:
                             #     bbox_speed = "unknown"
-                            bbox_speed,SpeedOverFlag = Estimated_speed(outputs_prev[-2], output, id, fps, bbox_width)
+                            bbox_speed, SpeedOverFlag = Estimated_speed(outputs_prev[-2], output, id, fps, bbox_width)
                             if SpeedOverFlag:
                                 SpeedOver = True
 
@@ -1110,29 +1136,32 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                         c] / f'{id}' / f'{p.stem}.jpg', BGR=True)
 
                     # LOGGER.info(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)')
-                    # self.statusBar.showMessage(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)',500)
-                    # if SpeedOver:
-                    # self.textEditShowResult.appendPlainText("有疾驶车辆，请小心驾驶")
-                    self.Append("有疾驶车辆，请小心驾驶")
+                    self.statusBar.showMessage(f'{s}Done. YOLO:({t3 - t2:.3f}s), StrongSORT:({t5 - t4:.3f}s)', 500)
+                    if SpeedOver:
+                        self.Append(f"{s}Done.有疾驶车辆，请小心驾驶")
 
                 else:
                     strongsort_list[i].increment_ages()
                     # LOGGER.info('No detections')
-                    # self.statusBar.showMessage('No detections',500)
+                    self.statusBar.showMessage('No detections', 500)
 
                 # Stream results
                 # 主要修改的地方
                 self.im0 = annotator.result()
-                if show_vid :
-                    self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
+                if show_vid:
                     # 去雾开关，增加对比
                     if self.DefogOpen and webcam == False:
                         im0modify = cv2.cvtColor(im0s, cv2.COLOR_BGR2BGRA)
+
+                        self.result = HistogramEqualization(self.im0)
+                        self.result = cv2.cvtColor(self.result, cv2.COLOR_BGR2BGRA)
                         resulttmp = np.zeros((im0modify.shape[0], im0modify.shape[1] * 2, 4))
                         resulttmp[:, :im0modify.shape[1], :] = im0modify.copy()
                         resulttmp[:, im0modify.shape[1]:, :] = self.result.copy()
                         resulttmp = np.array(resulttmp, dtype=np.uint8)
                         self.result = resulttmp
+                    else:
+                        self.result = cv2.cvtColor(self.im0, cv2.COLOR_BGR2BGRA)
                     # self.result = cv2.resize(self.result, (640, 480), interpolation=cv2.INTER_AREA)
                     self.QtImg = QtGui.QImage(self.result.data, self.result.shape[1], self.result.shape[0],
                                               QtGui.QImage.Format_RGB32)
@@ -1144,7 +1173,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                 if self.save_image_flag:
                     # QtImgSave = QtGui.QPixmap.fromImage(self.QtImg)
                     # filename 文件目录 filetype 文件类型
-                    filename,filetype = QtWidgets.QFileDialog.getSaveFileName(self,"保存当前帧图片",'./',"影像 (*.png *.jpg)")
+                    filename, filetype = QtWidgets.QFileDialog.getSaveFileName(self, "保存当前帧图片", './',
+                                                                               "影像 (*.png *.jpg)")
                     if filename:
                         self.QtImg.save(filename)
                     self.save_image_flag = False
@@ -1164,7 +1194,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                         vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                     vid_writer[i].write(im0)
 
-                if self.save_vid:
+                if save_vid:
                     if vid_path[i] != save_path:  # new video
                         vid_path[i] = save_path
                         if isinstance(vid_writer[i], cv2.VideoWriter):

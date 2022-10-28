@@ -52,7 +52,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, -355, 181, 1000))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 181, 1000))
         self.scrollAreaWidgetContents.setMinimumSize(QtCore.QSize(0, 1000))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_3 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
@@ -235,6 +235,17 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.groupBox_4)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
+
+        self.pushButtonParameterSet = QtWidgets.QPushButton(self.centralwidget)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.pushButtonParameterSet.sizePolicy().hasHeightForWidth())
+        self.pushButtonParameterSet.setSizePolicy(sizePolicy)
+        self.pushButtonParameterSet.setObjectName("pushButtonParameterSet")
+        self.verticalLayout.addWidget(self.pushButtonParameterSet)
+
+
         self.line_3 = QtWidgets.QFrame(self.centralwidget)
         self.line_3.setFrameShape(QtWidgets.QFrame.HLine)
         self.line_3.setFrameShadow(QtWidgets.QFrame.Sunken)
@@ -282,7 +293,6 @@ class Ui_MainWindow(object):
         self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line_5.setObjectName("line_5")
         self.horizontalLayout_4.addWidget(self.line_5)
-
         self.OutputVideoSaveBtn = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -291,8 +301,6 @@ class Ui_MainWindow(object):
         self.OutputVideoSaveBtn.setSizePolicy(sizePolicy)
         self.OutputVideoSaveBtn.setObjectName("OutputVideoSaveBtn")
         self.horizontalLayout_4.addWidget(self.OutputVideoSaveBtn)
-
-
         self.OutputSaveBtn = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -377,6 +385,7 @@ class Ui_MainWindow(object):
         self.checkBoxhide_speed.setText(_translate("MainWindow", "hide_speed"))
         self.checkBoxhalf.setText(_translate("MainWindow", "half"))
         self.checkBoxdnn.setText(_translate("MainWindow", "dnn"))
+        self.pushButtonParameterSet.setText(_translate("MainWindow", "更新参数"))
         self.labelshowresult.setText(_translate("MainWindow", "结果展示"))
         self.OutputVideoSaveBtn.setText(_translate("MainWindow", "开始记录\n"
 "结果"))

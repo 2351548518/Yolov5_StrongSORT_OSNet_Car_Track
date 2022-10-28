@@ -106,7 +106,7 @@ def HomorphicFiltering(original):
 
 
 def main():
-    f = plt.imread("test.png")
+    f = plt.imread("test4.jpg")
     # r, g, b = cv2.split(f)
     r = f[:, :, 0]
     g = f[:, :, 1]

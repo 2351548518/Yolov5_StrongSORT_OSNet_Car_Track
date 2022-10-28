@@ -5,15 +5,14 @@ import numpy as np
 # 01.py
 def HistogramEqualization(img):
     # img =src[...,::-1].transpose((0, 2, 3, 1))   # RGB to BGR ,BCHW to  BHWC
-    red = img[0, :, :]
-    green = img[1, :, :]
-    blue = img[2, :, :]
+    red = img[:, :, 0]
+    green = img[:, :, 1]
+    blue = img[:, :, 2]
     blue_equ = cv2.equalizeHist(blue)
     green_equ = cv2.equalizeHist(green)
     red_equ = cv2.equalizeHist(red)
     out = cv2.merge([red_equ, green_equ, blue_equ])
-    out = out.transpose((2, 0, 1))  # WHC to CHW
-
+    # out = out.transpose((2, 0, 1))  # WHC to CHW
     return out
 
 
