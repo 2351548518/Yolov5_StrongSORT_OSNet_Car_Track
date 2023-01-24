@@ -1132,9 +1132,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                 #     f'{id} {conf:.2f}' if hide_class else f'{id} {bbox_speed}'))
                                 label = f'{id}'
                                 if not hide_conf:
-                                    label += f'{conf:.2f}'
+                                    label += f'{conf:.2f} \t'
                                 if not hide_class:
-                                    label +=f'{names[c]}'
+                                    label +=f'{names[c]} \t'
                                 if not hide_speed:
                                     label += f'{bbox_speed}'
                                 label = None if hide_labels else label
