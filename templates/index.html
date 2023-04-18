@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveClear-自动驾驶辅助HUD交互系统</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <script src="../static/js/echarts.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Gilroy Semi Bold, -apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, Hiragino Sans GB, Microsoft YaHei, Helvetica Neue, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+        }
+
+        .video-box {
+            position: relative;
+            height: 100vh;
+            background-color: #C1CFF7;
+            /*进行视频裁剪*/
+            overflow: hidden;
+        }
+
+        .video-box .video-background {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            /*保证视频内容始终居中*/
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            min-height: 800px;
+        }
+
+        .layer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(19, 60, 154, .2);
+        }
+
+        .layer img {
+            margin-top: 15px;
+            margin-left: 100px;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+        }
+
+        .content .avatar-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .content .avatar-box .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-right: 25px;
+        }
+
+        .content .avatar-box .nickname {
+            font-size: 35px;
+            font-weight: 550;
+        }
+
+        .speedpanel {
+            position: fixed; /* 设置fixed固定定位 */
+            bottom: 0; /* 距离浏览器窗口下边框20px */
+            left: 5%; /* 距离浏览器窗口右边框20px */
+        }
+
+        .speedpanel a {
+            display: block; /* 将<a>标签设为块元素，用于美化样式 */
+            text-decoration: none; /* 取消超链接下画线 */
+            color: #333; /* 设置文本颜色 */
+            background-color: #f2f2f2; /* 设置背景颜色 */
+            border: 1px solid #ccc; /* 设置边框样式 */
+            padding: 10px 20px; /* 设置内边距 */
+            border-radius: 5px; /* 设置圆角矩形 */
+            letter-spacing: 2px; /* 设置文字间距 */
+        }
+
+        .top-alert {
+            position: fixed; /* 设置fixed固定定位 */
+            top: 10%; /* 距离浏览器窗口下边框20px */
+            left: 5%; /* 距离浏览器窗口右边框20px */
+        }
+
+        .top-alert a {
+            display: block; /* 将<a>标签设为块元素，用于美化样式 */
+            text-decoration: none; /* 取消超链接下画线 */
+            color: #333; /* 设置文本颜色 */
+            background-color: #f2f2f2; /* 设置背景颜色 */
+            border: 1px solid #ccc; /* 设置边框样式 */
+            padding: 10px 20px; /* 设置内边距 */
+            border-radius: 5px; /* 设置圆角矩形 */
+            letter-spacing: 2px; /* 设置文字间距 */
+        }
+    </style>
+</head>
+<body>
+<div class="video-box">
+    <video class="video-background" preload="auto" loop playsinline autoplay
+           src="../static/new.mp4" tabindex="-1"
+           muted="muted"></video>
+</div>
+<!-- 悬浮框结构 -->
+<div class="top-alert">
+    <div class="alert alert-warning alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        <strong>注意</strong> 前方有疾驰车辆.
+    </div>
+</div>
+<div class="speedpanel">
+    <div id="main" style="width: 600px; height: 400px"></div>
+</div>
+<!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+<script src="../static/js/jquery-3.2.1.min.js"></script>
+<!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+<script src="../static/js/bootstrap.min.js"></script>
+<script>
+    var myChart = echarts.init(document.getElementById("main"));
+
+    var color1 = [[0.33, "rgba(0,255,0,1)"], [0.5, "rgba(0,255,255,1)"], [1, "rgba(255,0,0,1)"]];
+    var option = {
+        tooltip: {
+            formatter: '{a}<br/>{b}:{c}'
+        },
+        series: [
+            {
+                name: '仪表盘',
+                type: 'gauge',
+                min: 0,
+                max: 240,
+                radius: '50%',
+                splitNumber: 12,
+                axisLine: {
+                    lineStyle: {
+                        width: 5,
+                        color: color1,
+
+                    }
+                },
+                axisTick: {
+                    length: 10, splitNumber: 5, lineStyle: {color: '#FDCF20'}
+                },
+                splitLine: {
+                    length: 20,
+                    lineStyle: {color: '#FDCF20',}
+                },
+                title: {
+                    textStyle: {fontWeight: 'bolder', fontsize: 20, fontStyle: 'normal', color: 'auto'},
+                },
+                pointer: {
+                    show: true,
+                    length: '75%',
+                    width: 10
+
+                },
+                itemStyle: {
+                    color: color1,
+                    shadowBlur: 20,
+                    shadowColor: "pink",
+                },
+
+
+                detail: {
+                    show: true,
+                    color: 'auto',
+                    formatter: '{value}'
+                },
+                data:
+                    [{name: '速度表', value: 20},
+
+                    ]
+
+            },
+            {
+                name: '转速', type: 'gauge',
+                center: ['20%', '55%'],  //设置转速仪表盘中心点的位置，默认全局居中
+                radius: '35%',  //设置转速油表仪表盘的大小
+                min: 0,  //设置转速仪表盘的最小值
+                max: 7,  //设置转速仪表盘的最大值
+                endAngle: 45,
+                splitNumber: 7,  //设置转速仪表盘的分隔数目为7
+                axisLine: {show: true, lineStyle: {width: 4, color: color1}},  //设置属性lineStyle控制线条样式
+                axisTick: {  //设置坐标轴小标记
+                    length: 6,  //设置属性length控制线长
+                    splitNumber: 5,  //设置坐标轴小标记的分隔数目为5
+                    lineStyle: {  //设置属性lineStyle控制线条样式
+                        color: '#FDCF20'
+                    }
+                },
+                splitLine: {  //设置分隔线
+                    length: 10,  //设置属性length控制线长
+                    lineStyle: {  //设置属性lineStyle（详见lineStyle）控制线条样式
+                        color: '#FDCF20'
+                    }
+                },
+                pointer: {
+                    show: true,
+                    length: '70%',
+                    width: 5
+
+                },
+                itemStyle: {
+                    color: color1,
+                    shadowBlur: 20,  //设置(发光效果)图形阴影的模糊大小
+                    shadowColor: "pink",  //设置阴影颜色，支持的格式同color
+                },
+                title: {
+                    offsetCenter: ['0% ', '-30%'],
+                    textStyle: {fontWeight: 'bolder', fontsize: 3, fontStyle: 'normal', color: 'auto'},
+                },
+                detail: {textStyle: {fontWeight: 'bolder', fontSize: 20, color: 'auto'}, formatter: '{value} '},
+                data: [{value: 1.5, name: '转速'}]
+            },
+            {
+                name: '里程', type: 'gauge',
+                center: ['80%', '50%'],
+                min: 0,
+                max: 10,
+                startAngle: 135,
+                endAngle: 45,
+                splitNumber: 5,
+                radius: '35%',
+                axisLine: {
+                    lineStyle: {color: color1, width: 3}
+                },
+                axisTick: {
+                    splitNumber: 5,
+                    length: 5,
+                    lineStyle: {color: '#FDCF20'}
+                },
+                splitLine: {
+                    length: 15, lineStyle: {color: '#FDCF20'}
+                },
+                pointer: {
+                    show: true,
+                    width: 3,
+                    length: '70%'
+                },
+                itemStyle: {
+                    color: color1,
+                    shadowBlur: 10,
+                    shadowColor: 'white'
+                },
+                title: {
+                    offsetCenter: ['0', '-120%'],
+                    textStyle: {fontWeight: 'bolder', fontsize: 3, fontStyle: 'normal', color: 'auto'},
+                },
+                detail: {
+                    show: false,
+                    textStyle: {fontWeight: 'bolder', fontSize: 20, color: 'auto'},
+                    formatter: '{value} '
+                },
+                data: [{value: 1.5, name: '里程表'}]
+
+            },
+            {
+                name: '油表', type: 'gauge',
+                center: ['80%', '50%'],
+                radius: '35%',
+                min: 0,
+                max: 2,
+                startAngle: 315, endAngle: 225,
+                splitNumber: 2,
+                axisLine: {lineStyle: {width: 3, color: color1}},  //设置属性lineStyle控制线条样式
+                axisTick: {
+                    splitNumber: 5,
+                    length: 10,
+                    lineStyle: {
+                        color: '#FDCF20'
+                    }
+                },
+                axisLabel: {
+                    formatter: function (v) {
+                        switch (v + '') {
+                            case '0':
+                                return 'E';
+                            case '1':
+                                return '油表';
+                            case '2':
+                                return 'F';
+                        }
+                    }
+                },
+                splitLine: {
+                    length: 15,
+                    lineStyle: {
+                        color: '#FDCF20'
+                    }
+                },
+                pointer: {width: 4},
+                itemStyle: {
+                    color: 'yellow',
+                    shadowBlur: 10,
+                    shadowColor: 'white'
+                },
+                title: {show: false},
+                detail: {show: false},
+                data: [{value: 0.5, name: 'gas'}]
+            },
+
+        ]
+    }
+    setInterval(function (arg) {
+        var num = Math.random()*0.1 + 0.3
+        option.series[0].data[0].value = (num * 240).toFixed(2);
+        option.series[1].data[0].value = (num * 7).toFixed(2);
+        option.series[2].data[0].value = (num * 10).toFixed(2);
+        option.series[3].data[0].value = (num * 10).toFixed(2);
+        myChart.setOption(option)
+
+    }, 1000)
+
+</script>
+</body>
+</html>
