@@ -1,7 +1,7 @@
 import cv2
 import matplotlib.pyplot as plt
 
-img = cv2.imread("test4.jpg")
+img = cv2.imread("a.jpg")
 
 blue = img[:, :, 0]
 green = img[:, :, 1]

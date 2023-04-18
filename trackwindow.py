@@ -324,7 +324,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                      "conf_thres": self.conf_thres,
                                      "iou_thres": self.iou_thres,
                                      "max_det": self.max_det,
-                                     "device":self.device,
+                                     "device": self.device,
                                      "show_vid": self.show_vid,
                                      "save_txt": self.save_txt,
                                      "save_conf": self.save_conf,
@@ -841,7 +841,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "车辆检测跟踪系统"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "DriveClear-自动驾驶辅助HUD交互系统"))
         self.VideoOpenBtn.setText(_translate("MainWindow", "打开视频"))
         self.CameraOpenBtn.setText(_translate("MainWindow", "打开摄像机"))
         self.radioButtonDefogOpen.setText(_translate("MainWindow", "去雾开关"))
@@ -965,7 +965,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             dataset = LoadImages(source, img_size=imgsz, stride=self.stride, auto=True)
             nr_sources = 1  # batch_size
         vid_path, vid_writer, txt_path = [None] * nr_sources, [None] * nr_sources, [None] * nr_sources
-
 
         # initialize StrongSORT
         cfg = get_config()
@@ -1114,11 +1113,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                 bbox_h = output[3] - output[1]
                                 bbox_conf = output[6]
                                 result = ('%g ' * 11 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                                   bbox_top, bbox_w, bbox_h, -1, -1, -1, i, bbox_conf) \
+                                                                bbox_top, bbox_w, bbox_h, -1, -1, -1, i, bbox_conf) \
                                     if save_conf \
                                     else ('%g ' * 10 + '\n') % (frame_idx + 1, id, bbox_left,  # MOT format
-                                                                   bbox_top, bbox_w, bbox_h, -1, -1, -1, i )
-
+                                                                bbox_top, bbox_w, bbox_h, -1, -1, -1, i)
 
                                 # Write MOT compliant results to file
                                 with open(txt_path + '.txt', 'a') as f:
@@ -1132,9 +1130,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                                 #     f'{id} {conf:.2f}' if hide_class else f'{id} {bbox_speed}'))
                                 label = f'{id}'
                                 if not hide_conf:
-                                    label += f'{conf:.2f}'
+                                    label += f'{conf:.2f} '
                                 if not hide_class:
-                                    label +=f'{names[c]}'
+                                    label += f'{names[c]} '
                                 if not hide_speed:
                                     label += f'{bbox_speed}'
                                 label = None if hide_labels else label
@@ -1165,6 +1163,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
                     if self.DefogOpen and webcam == False:
                         im0modify = cv2.cvtColor(im0s, cv2.COLOR_BGR2BGRA)
 
+                        # self.result = zmIceColorDefog(self.im0)
                         self.result = HistogramEqualization(self.im0)
                         self.result = cv2.cvtColor(self.result, cv2.COLOR_BGR2BGRA)
                         resulttmp = np.zeros((im0modify.shape[0], im0modify.shape[1] * 2, 4))

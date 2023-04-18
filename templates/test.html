@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>css3动画闪烁框</title>
+		<style type="text/css">
+			.box-content {
+				position: relative;
+				margin: 0 auto;
+				margin-top: 100px;
+				width: 210px;
+				height: 34px;
+				background-color: #fff;
+			}
+			.box-wrapper {
+				position: absolute;
+				box-sizing: border-box;
+				top: -2px;
+				left: -2px;
+				width: 214px;
+				height: 38px;
+				background-color: #F56C6C;
+				/* border: 4px dashed black; */
+				box-shadow:#F56C6C 0px 0px 4px;
+				z-index: -9;
+				box-shadow: #000;
+			}
+			.animation-flash {
+				animation: myfirst 0.5s linear;
+				-webkit-animation: myfirst 0.5s linear;
+				animation-iteration-count:infinite;
+				-webkit-animation-iteration-count:infinite;
+			}
+			@keyframes myfirst{
+				0%   { opacity:1; }
+				25%  { opacity:0.85; }
+				50%  { opacity:0.75; }
+				75%  { opacity:0.65; }
+				100% { opacity:0.25; }
+			}
+			@-webkit-keyframes myfirst{
+				0%   { opacity:1; }
+				25%  { opacity:0.85; }
+				50%  { opacity:0.65; }
+				75%  { opacity:0.65; }
+				100% { opacity:0.25; }
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box-content">
+			<div class="box-wrapper animation-flash">	
+			</div>
+		</div>
+	</body>
+</html>
